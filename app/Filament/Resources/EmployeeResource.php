@@ -12,6 +12,11 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\Filter;
+use Filament\Forms\Components\DatePicker;
+use Filament\Tables\Filters\Indicator;
+use Carbon\Carbon;
 
 class EmployeeResource extends Resource
 {
@@ -106,7 +111,39 @@ class EmployeeResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('Department')->relationship('department','name'),
+                SelectFilter::make('City')->relationship('city','name'),
+                Filter::make('date_hired')
+                ->form([
+                    DatePicker::make('date_hired_from'),
+                    DatePicker::make('date_hired_until'),
+                ])
+                ->query(function (Builder $query, array $data): Builder {
+                    return $query
+                        ->when(
+                            $data['date_hired_from'],
+                            fn (Builder $query, $date): Builder => $query->whereDate('date_hired', '>=', $date),
+                        )
+                        ->when(
+                            $data['date_hired_until'],
+                            fn (Builder $query, $date): Builder => $query->whereDate('date_hired', '<=', $date),
+                        );
+                })
+                ->indicateUsing(function (array $data): array {
+                    $indicators = [];
+             
+                    if ($data['date_hired_from'] ?? null) {
+                        $indicators[] = Indicator::make('Hired from ' . Carbon::parse($data['date_hired_from'])->toFormattedDateString())
+                            ->removeField('date_hired_from');
+                    }
+             
+                    if ($data['date_hired_until'] ?? null) {
+                        $indicators[] = Indicator::make('Hired until ' . Carbon::parse($data['date_hired_until'])->toFormattedDateString())
+                            ->removeField('date_hired_until');
+                    }
+             
+                    return $indicators;
+                })
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
