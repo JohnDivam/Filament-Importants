@@ -65,10 +65,11 @@ class CountryResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\StatesRelationManager::class
         ];
     }
 
+ 
     public static function getPages(): array
     {
         return [
