@@ -12,6 +12,8 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Infolists\InfoList;
+use Filament\Infolists\Components\TextEntry;
 
 class StateResource extends Resource
 {
@@ -41,13 +43,13 @@ class StateResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('country.name')
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('name')
                     ->label('State name')
                     ->sortable()
-                    ->searchable()
-                    ->hidden(auth()->user()->id != 1),
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('country.name')
+                    ->hidden(auth()->user()->id != 1)
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -62,6 +64,7 @@ class StateResource extends Resource
                 //
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
@@ -74,7 +77,7 @@ class StateResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\CitiesRelationManager::class
         ];
     }
 
@@ -83,7 +86,18 @@ class StateResource extends Resource
         return [
             'index' => Pages\ListStates::route('/'),
             'create' => Pages\CreateState::route('/create'),
+            'view' => Pages\ViewState::route('/{record}'),
             'edit' => Pages\EditState::route('/{record}/edit'),
         ];
     }
+
+    public static function infolist(InfoList $infolist): InfoList
+    {
+        return $infolist
+            ->schema([
+                TextEntry::make('name')->label('State name'),
+                TextEntry::make('country.name'),
+            ]);
+    }
+
 }
