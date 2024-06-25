@@ -25,6 +25,9 @@ class EmployeeResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
     protected static ?string $navigationGroup = 'Employee Management';
+    protected static ?string $navigationLabel = 'الموظفين';
+    protected static ?string $modelLabel = 'موظقف';
+    protected static ?string $pluralModelLabel = 'موظفين';
 
     protected static ?string $recordTitleAttribute = 'first_name';
 
